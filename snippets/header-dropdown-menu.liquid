@@ -1,0 +1,92 @@
+<nav class="header__inline-menu">
+  <ul class="list-menu list-menu--inline" role="list">
+    {% for link in section.settings.menu.links %}
+      {% assign mega_menu = false %}
+      {% for block in section.blocks %}
+        {% if block.settings.title == link.title %}
+          {% assign mega_menu = true %}
+          <li class="mega-menu-list">
+      <a href="#" class="header__menu-item list-menu__item link link--text focus-inset">
+        {{link.title}}
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="10px" width="10px" version="1.1" id="Layer_1" viewBox="0 0 407.437 407.437" xml:space="preserve">
+          <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/>
+        </svg>
+      </a>
+      <div class="mega-menu-wrapper">
+        <div class="mega-menu-row">
+          {% for child_link in block.settings.linklist.links -%}
+            {% assign reminder = forloop.index | modulo: 2 %}
+            {% if reminder == 1%}
+               <div class="mega-menu-column">
+               {% endif %}
+                    <div class="menu-item-inner">
+                        <h3>{{child_link.title}}</h3>
+                        <ul>
+                         {% for sub_child_link in child_link.links %}
+                            <li><a href="{{ sub_child_link.url }}">{{ sub_child_link.title }}</a></li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    {% if reminder == 0 %}
+                    </div>
+                     {% endif %}
+               {% endfor %}
+               <div class="mega-menu-column mega-menu-image">
+                <div class="image-grid">
+                  {% for i in (1..8) %}
+                    {% assign caption = "caption_" | append : i %}
+                    {% assign image = "image_" | append : i %}
+                    {% assign link = "link_" | append : i %}
+                    {% if block.settings[image] != blank%}
+                  <div class="image-box">
+                    <div class="img-product-meta">
+                      <img src="{{block.settings[image] | img_url: ''}}" alt=""> 
+                     
+                      
+                      <div class="product-buttons">
+                        <a href="{{ block.settings[link] }}"></a>
+                      </div>
+                    </div>
+                  
+										
+                    <div class="product-caption">
+                      <h4>{{ block.settings[caption] }}</h4>
+                    </div>
+                  </div>
+                      
+                     
+                  {% endif %}
+                  {% endfor %}
+                  <div class="hero col-md-6">
+          {% capture hero %}hero_image{% endcapture %}
+                    {% if block.settings[hero] != blank%}
+                    
+															<div class="media-hero">
+																<img src="{{ block.settings[hero] | img_url: '' }}"
+
+																	 data-src="{{ block.settings[hero] | asset_img_url: '720x' }}"
+																	 alt="{{ shop.name }}"
+																	 data-parent-fit="contain"
+																	 alt="{{ shop.name }}" height="770" width="270"
+																	 class="lazyload media-object">
+															</div>
+							</div>
+                     {% endif %}
+                  
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+                      
+        {% endif %}
+      {% endfor %}
+             
+      
+               		
+      {% if mega_menu == false %}
+        <li><a href="{{link.url}}" class="header__menu-item list-menu__item link link--text focus-inset ">{{link.title}}</a></li>
+      {% endif %}
+    {% endfor %}
+</ul>
+</nav>
