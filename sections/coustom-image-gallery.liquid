@@ -1,0 +1,106 @@
+<div class="gall-section">
+  <h2>{{ section.settings.heading }}</h2></div>
+<div class="image-gallery">
+  <h2>{{ section.settings.image-gallery }}</h2> <!-- Title added here -->
+  {% for block in section.blocks %}
+    <div class="gallery-items">
+     
+      <img src="{{ block.settings.image | img_url: 'large' }}" alt="{{ block.settings.image.alt | escape }}">
+     <div class="overlayss" style= " margin-bottom: 15px">{{ block.settings.title1 }}</div>
+      <a href="{{ block.settings.link }}">
+        <div class="overlays">{{ block.settings.text }}</div>
+    </a>
+    </div>
+  {% endfor %}
+  
+</div>
+
+<style>
+  .image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Adjust the gap between images as needed */
+  }
+  .gallery-items {
+    position: relative;
+    width: calc(33.333% - 10px); /* 3 images per row, adjust as needed */
+  }
+  .gallery-items img {
+    width: 100%;
+    display: block;
+    
+  }
+  .gallery-items .overlays {
+    position: absolute;
+    top: 0px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5); /* Dark overlay, adjust color/opacity as needed */
+    color: #fff; /* Text color */
+    display: flex;
+    
+    align-items: flex-end;
+   
+  }
+
+ 
+</style>
+
+{% schema %}
+{
+  "name": "Coustom Image Gallery",
+   "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Our Gallery"
+    }
+  ],
+  "max_blocks": 12,
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image with Overlay Text",
+      "settings": [
+       {
+      "type": "text",
+  "id": "title",
+  "label": "Title"
+
+    },
+        {
+          "id": "image",
+          "type": "image_picker",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+          
+        },
+        {
+          "id": "text",
+          "type": "text",
+          "label": "Overlay Text",
+          "default": "Your Text Here"
+        },
+         {
+          "id": "title1",
+          "type": "text",
+          "label": "Heading Text",
+          "default": " Text Here"
+        }
+      ]
+      
+   }
+  ],
+  "presets": [
+    {
+      "name": " Coustom Image Gallery"
+    }
+  ]
+}
+{% endschema %}

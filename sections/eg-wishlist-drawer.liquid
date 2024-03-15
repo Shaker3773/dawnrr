@@ -1,0 +1,779 @@
+{% comment %} 
+    EG Wishlist Drawer
+    © 2022 EcomGraduates
+    https://wwww.ecomgraduates.com 
+{% endcomment %}
+
+{% liquid
+    case section.settings.product_img_orientation
+        when 'square'
+            assign product_img_width  = 120
+            assign product_img_height = 120
+        when 'landscape'
+            assign product_img_width  = 120
+            assign product_img_height = 90
+        when 'potrait'
+            assign product_img_width  = 90
+            assign product_img_height = 120
+    endcase
+
+    assign product_img_size = product_img_width | append: 'x' | append: product_img_height
+%}
+
+{% comment %}theme-check-disable{% endcomment %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap-utilities.min.css" integrity="sha256-SYZ4TAMHw3/Lv45coEH6k+nJj3Z/cDrNxDLT/srSQ/g=" crossorigin="anonymous">
+{% comment %}theme-check-enable{% endcomment %}
+
+<style>
+/*
+    General styles
+*/
+[type=button]:not(:disabled), 
+[type=reset]:not(:disabled), 
+[type=submit]:not(:disabled), 
+button:not(:disabled) {
+    cursor: pointer;
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+.small {
+    font-size: .875em;
+}
+
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 
+    Bootstrap Offcanvas 
+    https://github.com/twbs/bootstrap/blob/main/dist/css/bootstrap.css
+*/
+.offcanvas {
+    position: fixed;
+    bottom: 0;
+    z-index: 1045;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    visibility: hidden;
+    background-color: #fff;
+    background-clip: padding-box;
+    outline: 0;
+    transition: transform 0.3s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .offcanvas {
+      transition: none;
+    }
+}
+
+.offcanvas-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+}
+
+.offcanvas-backdrop.fade {
+    transition: opacity .15s linear;
+    opacity: 0;
+}
+
+.offcanvas-backdrop.show {
+    opacity: 0.5;
+}
+
+.offcanvas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1rem;
+}
+
+.offcanvas-header .btn-close {
+    padding: 0.5rem 0.5rem;
+    margin-top: -0.5rem;
+    margin-right: -0.5rem;
+    margin-bottom: -0.5rem;
+}
+
+.offcanvas-title {
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+.offcanvas-body {
+    flex-grow: 1;
+    padding: 1rem 1rem;
+    overflow-y: auto;
+}
+
+.offcanvas-start {
+    top: 0;
+    left: 0;
+    width: 400px;
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%);
+}
+
+.offcanvas-end {
+    top: 0;
+    right: 0;
+    width: 400px;
+    border-left: 1px solid rgba(0, 0, 0, 0.2);
+    transform: translateX(100%);
+}
+
+.offcanvas-top {
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 30vh;
+    max-height: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    transform: translateY(-100%);
+}
+
+.offcanvas-bottom {
+    right: 0;
+    left: 0;
+    height: 30vh;
+    max-height: 100%;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    transform: translateY(100%);
+}
+
+.offcanvas.show {
+    transform: none;
+}
+
+/*
+    Btn close
+    https://github.com/twbs/bootstrap/blob/main/dist/css/bootstrap.css
+*/
+.btn-close {
+    box-sizing: content-box;
+    width: 1em;
+    height: 1em;
+    padding: 0.25em 0.25em;
+    color: #000;
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    border: 0;
+    border-radius: 0.25rem;
+    opacity: 0.5;
+}
+.btn-close:hover {
+    color: #000;
+    text-decoration: none;
+    opacity: 0.75;
+}
+.btn-close:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    opacity: 1;
+}
+.btn-close:disabled, .btn-close.disabled {
+    pointer-events: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    opacity: 0.25;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/*
+    Overrides Bootstrap styles
+*/
+.offcanvas {
+    border: none;
+    box-shadow: 0 0 2rem rgba(0, 0, 0, .25);
+}
+
+.offcanvas-backdrop {
+    display: block !important; /* Fix for Dawn theme that hides empty divs */
+}
+
+/* 
+    Header 
+*/
+@media (max-width: 989px) {
+    header-drawer {
+        display: flex;
+    }
+  svg.icon.icon-wishlist.bi.bi-heart {
+    margin-right: -450px;
+    
+}
+}
+
+.header__icon--wishlist {
+    position: relative;
+}
+  
+header-drawer #wishlist-icon-bubble.small-hide {
+    display: flex! important;
+}
+
+.wishlist-count-bubble {
+    position: absolute;
+    background-color: rgb(var(--color-button));
+    color: rgb(var(--color-button-text));
+    height: 1.7rem;
+    width: 1.7rem;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: .9rem;
+    bottom: 0.8rem;
+    left: 2.2rem;
+    line-height: calc(1 + .1 / var(--font-body-scale));
+}
+ 
+/* 
+    Wishlist button (product page) 
+*/
+.product__info-wrapper .button-add-remove-wishlist {
+    margin-top: -1.25rem;
+}
+  
+.product__info-wrapper .button-add-remove-wishlist > span {
+    display: inline-flex;
+    align-items: center;
+}
+  
+.product__info-wrapper .button-add-remove-wishlist svg {
+    margin-right: 0.75rem;
+}
+  
+/* 
+    Wishlist button (product cards) 
+*/
+.card__inner .button-add-remove-wishlist {
+    position: absolute;
+    left: auto;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    padding: 0;
+    width: 42px;
+    height: 42px;
+    min-width: auto;
+    min-height: auto;
+    z-index: 2;
+}
+
+/*
+    Drawer stylings
+*/
+#eg-wishlist-drawer-product-list {
+}
+
+#eg-wishlist-drawer-product-list hr {
+    margin: 1rem 0 .25rem;
+    opacity: .5;
+}
+
+#eg-wishlist-drawer-product-list .btn-remove-from-wishlist {
+    min-width: auto;
+}
+   
+</style>
+
+<script>
+window.addEventListener('DOMContentLoaded', (event) => {
+    const egWishlistDrawerElem = document.querySelector('#eg-wishlist-drawer')
+    const localStorageKey = 'eg_wishlist_v1';
+
+    // Init Bootstrap script if 
+    const initBootstrapScript = () => {
+        if (!document.querySelector('#bootstrap-js')) {
+            const script = document.createElement('script')
+            script.setAttribute('id', 'bootstrap-js')
+            script.setAttribute('src', 'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js')
+            script.setAttribute('integrity', 'sha256-cMPWkL3FzjuaFSfEYESYmjF25hCIL6mfRSPnW8OVvM4=')
+            script.setAttribute('crossorigin', 'anonymous')
+            document.head.appendChild(script)
+        }
+    }
+    initBootstrapScript()
+
+    // Open the wishlist drawer by URL if contains '#wishlist'
+    if (window.location.hash.includes('#wishlist')) {
+        setTimeout(() => {
+            const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(egWishlistDrawerElem)
+            offcanvas.show()
+        }, 200)
+    }
+
+    // Shopify resize image (helper function)
+    // https://gist.github.com/DanWebb/cce6ab34dd521fcac6ba
+    const egWishlistResizeImageHelper = (src, size, crop = '') => src.replace(/_(pico|icon|thumb|small|compact|medium|large|grande|original|1024x1024|2048x2048|master)+\./g, '.')
+    .replace(/\.jpg|\.png|\.gif|\.jpeg/g, (match) => {
+        if (crop.length) {
+            // eslint-disable-next-line no-param-reassign
+            crop = `_crop_${crop}`;
+        }
+        return `_${size}${crop}${match}`;
+    });
+
+    // Shopify format money (helper function)
+    // https://gist.github.com/stewartknapman/8d8733ea58d2314c373e94114472d44c
+    const egWishlistFormatMoneyHelper = (cents, format) => {
+        if (typeof cents === 'string') {
+            // eslint-disable-next-line no-param-reassign
+            cents = cents.replace('.', '');
+        }
+        let value = '';
+        const placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
+        const formatString = (format || document.querySelector('#eg-wishlist-drawer').dataset.moneyFormat);
+
+        function defaultOption(opt, def) {
+            return (typeof opt === 'undefined' ? def : opt);
+        }
+
+        function formatWithDelimiters(number, precision, thousands, decimal) {
+            // eslint-disable-next-line no-param-reassign
+            precision = defaultOption(precision, 2);
+            // eslint-disable-next-line no-param-reassign
+            thousands = defaultOption(thousands, ',');
+            // eslint-disable-next-line no-param-reassign
+            decimal = defaultOption(decimal, '.');
+
+            if (Number.isNaN(number) || number == null) { return 0; }
+
+            // eslint-disable-next-line no-param-reassign
+            number = (number / 100.0).toFixed(precision);
+
+            const parts = number.split('.');
+            // eslint-disable-next-line prefer-template
+            const dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands);
+            // eslint-disable-next-line no-param-reassign
+            cents = parts[1] ? (decimal + parts[1]) : '';
+
+            return dollars + cents;
+        }
+
+        // eslint-disable-next-line default-case
+        switch (formatString.match(placeholderRegex)[1]) {
+        case 'amount': value = formatWithDelimiters(cents, 2); break;
+        case 'amount_no_decimals': value = formatWithDelimiters(cents, 0); break;
+        case 'amount_with_comma_separator': value = formatWithDelimiters(cents, 2, '.', ','); break;
+        case 'amount_no_decimals_with_comma_separator': value = formatWithDelimiters(cents, 0, '.', ','); break;
+        }
+
+        return formatString.replace(placeholderRegex, value);
+    };
+
+
+    // Dynamically add wishlist icons in the header
+    const insertWishlistIconsHeader = () => {
+        const htmlToInsert = `
+            <a 
+                id="wishlist-icon-bubble" 
+                class="header__icon header__icon--wishlist link focus-inset small-hide medium-hide"
+                href="#eg-wishlist-drawer" 
+                role="button" 
+                data-bs-toggle="offcanvas" 
+                aria-controls="eg-wishlist-drawer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="icon icon-wishlist bi bi-heart" viewBox="0 0 16 16" style="fill: currentColor;">
+                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"></path>
+                </svg>
+                <span class="visually-hidden">
+                    ${egWishlistDrawerElem.dataset.textWishlist}
+                </span>
+                <div 
+                    class="wishlist-count-bubble" 
+                    style="display: none;" 
+                    aria-hidden="true">
+                </div>
+            </a>
+        `
+        const cartIcon = document.querySelector('#cart-icon-bubble')
+        const menuTogglerIcon = document.querySelector('#Details-menu-drawer-container')
+
+        if (cartIcon) {
+            cartIcon.insertAdjacentHTML('beforebegin', htmlToInsert)
+        }
+
+        if (menuTogglerIcon) {
+            menuTogglerIcon.insertAdjacentHTML('afterend', htmlToInsert)
+        }
+    }
+    insertWishlistIconsHeader()
+
+    // Dynamically add the wishlist button in the PDP (product page)
+    const insertWishlistBtnPdp = () => {
+        if (egWishlistDrawerElem.dataset.displayBtnPdp === 'false') {
+            return;
+        }
+        const htmlToInsert = `
+            <button 
+                class="button-add-remove-wishlist button button--full-width button--tertiary" 
+                type="button"
+                onclick="onClickEgWishlistButton(this, event)"
+                style="display: none;">
+                <span data-add>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="icon icon-wishlist bi bi-heart" viewBox="0 0 16 16">
+                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                    </svg>
+                    ${egWishlistDrawerElem.dataset.textAdd}
+                </span>
+                <span data-remove>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="icon icon-wishlist bi bi-heart-fill" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                    </svg>
+                    ${egWishlistDrawerElem.dataset.textRemove}
+                </span>
+            </button>
+        `
+        const productForm = document.querySelector('.product .product-form')
+
+        if (productForm) {
+            productForm.insertAdjacentHTML('afterend', htmlToInsert)
+        }
+    }
+    insertWishlistBtnPdp()
+
+    // Dynamically add the wishlist buttons in the product list items
+    const insertWishlistBtnLists = () => {
+        if (egWishlistDrawerElem.dataset.displayBtnLists === 'false') {
+            return;
+        }
+        const htmlToInsert = `
+            <button 
+                class="button-add-remove-wishlist button button--tertiary" 
+                type="button"
+                onclick="onClickEgWishlistButton(this, event)"
+                style="display: none;">
+                <span data-add>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="icon icon-wishlist bi bi-heart" viewBox="0 0 16 16">
+                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                    </svg>
+                    <span class="visually-hidden">
+                        ${egWishlistDrawerElem.dataset.textAdd}
+                    </span>
+                </span>
+                <span data-remove>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="icon icon-wishlist bi bi-heart-fill" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                    </svg>
+                    <span class="visually-hidden">
+                        ${egWishlistDrawerElem.dataset.textRemove}
+                    </span>
+                </span>
+            </button>
+        `
+        document.querySelectorAll('.product-grid .card__inner').forEach((cardInner) => {
+            cardInner.insertAdjacentHTML('beforeend', htmlToInsert)
+        })
+         // Inject the buttons again if the url changes (handle Shopify's ajax for filters)
+        const lastUrl = location.href; 
+        new MutationObserver(() => {
+            if (location.href !== lastUrl) {
+                document.querySelectorAll('.product-grid .card__inner').forEach((cardInner) => {
+                    if (!cardInner.querySelector('.button-add-remove-wishlist')) {
+                        cardInner.insertAdjacentHTML('beforeend', htmlToInsert)
+                    }
+                })
+                initWishlist()
+            }
+        }).observe(document, {subtree: true, childList: true});
+    }
+    insertWishlistBtnLists()
+
+    // Init Wishlist
+    const initWishlist = () => {
+        const wishlist = JSON.parse(localStorage.getItem(localStorageKey)) || [];
+
+        document.querySelectorAll('.button-add-remove-wishlist').forEach((btn) => {
+            const productHandle = btn.closest('[data-product-handle]')?.dataset.productHandle
+
+            if (!productHandle?.length) {
+                console.log('%c You have not correctly implemented the Wishlist changes. Please contact us at EcomGradautes.com', 'color: red')
+            }
+
+            const isWishlisted = wishlist.some((elem) => elem.handle === productHandle)
+
+            if (isWishlisted) {
+                btn.querySelector('[data-add]').style.display = 'none'
+                btn.querySelector('[data-remove]').style.display = 'inline-flex'
+            } else {
+                btn.querySelector('[data-add]').style.display = 'inline-flex'
+                btn.querySelector('[data-remove]').style.display = 'none'
+            }
+
+            btn.style.display = 'block'
+        });
+
+        document.querySelectorAll('.wishlist-count-bubble').forEach((bubble) => {
+            if (wishlist.length === 0) {
+                bubble.style.display = 'none'
+            } else {
+                bubble.style.display = 'flex'
+                bubble.textContent = wishlist.length
+            }
+        });
+    };
+    initWishlist();
+
+    // Wishlist Buttons
+    window.onClickEgWishlistButton = async (btn, event) => {
+        event.preventDefault();
+
+        const productHandle = btn.closest('[data-product-handle]')?.dataset.productHandle
+
+        let wishlist = JSON.parse(localStorage.getItem(localStorageKey)) || [];
+        const isWishlisted = wishlist.some((elem) => elem.handle === productHandle)
+
+        if (isWishlisted) {
+            wishlist = wishlist.filter((elem) => elem.handle !== productHandle)
+        } else {
+            const response = await fetch(`/products/${productHandle}.js`)
+            const product = await response.json()
+
+            console.log(product)
+
+            wishlist.push({
+                id: product.id,
+                handle: productHandle,
+                url: product.url,
+                title: product.title,
+                compare_at_price: product.compare_at_price,
+                compare_at_price_variese: product.compare_at_price_varies,
+                price: product.price,
+                featured_image: product.featured_image,
+                vendor: product.vendor,
+                time: Date.now()
+            })
+        }
+
+        localStorage.setItem(localStorageKey, JSON.stringify(wishlist))
+        initWishlist()
+        buildWishlistDrawer()
+    };
+
+    // Build Wishlist Drawer
+    const buildWishlistDrawer = () => {
+        const drawer = document.querySelector('#eg-wishlist-drawer')
+
+        let wishlist = JSON.parse(localStorage.getItem(localStorageKey)) || []
+        const drawerEmpty = drawer.querySelector('#eg-wishlist-drawer-empty')
+        const drawerProductList = drawer.querySelector('#eg-wishlist-drawer-product-list')
+
+        drawerProductList.innerHTML = ''
+
+        if (wishlist.length === 0) {
+            drawerEmpty.style.display = 'block'
+            drawerProductList.style.display = 'none'
+        } else {
+            let buildProductListItems = '';
+
+            wishlist.forEach((product) => {
+                buildProductListItems += `
+                    <li class="product-list-item">
+                        <div class="d-flex align-items-center mx-n3 py-3">
+                            <a href="${product.url}" class="d-block flex-shrink-0 me-3">
+                                <img 
+                                    class="cart-item__image img-fluid" 
+                                    src="${egWishlistResizeImageHelper(product.featured_image || 'no-image.gif', `${drawer.dataset.imgWidth}x${drawer.dataset.imgHeight}`, 'center')}"
+                                    alt="" 
+                                    width="${drawer.dataset.imgWidth}"
+                                    height="${drawer.dataset.imgHeight}"
+                                    style="display: block" 
+                                    loading="lazy">
+                            </a>
+                            <div class="w-100">
+                                <a href="${product.url}" class="cart-item__name  break mb-1">
+                                    ${product.title}
+                                </a>
+                                <div class="product-price-container product-option mb-2">
+                                    <s class="product-price-compare me-2" style="${product.compare_at_price > product.price ? '' : 'display: none;'}">
+                                        <span class="visually-hidden">
+                                            Old price
+                                        </span>
+                                        ${egWishlistFormatMoneyHelper(product.compare_at_price)}
+                                    </s>
+                                    <span class="product-price-final">
+                                        ${egWishlistFormatMoneyHelper(product.price)}
+                                    </span>
+                                </div>
+                            </div>
+                            <button 
+                                class="btn-remove-from-wishlist button button--tertiary px-2 ms-3"
+                                aria-label="${drawer.dataset.textRemove}"
+                                data-product-handle="${product.handle}">
+                                <svg width="15" height="15" class="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation" class="icon icon-remove">
+                                    <path d="M14 3h-3.53a3.07 3.07 0 00-.6-1.65C9.44.82 8.8.5 8 .5s-1.44.32-1.87.85A3.06 3.06 0 005.53 3H2a.5.5 0 000 1h1.25v10c0 .28.22.5.5.5h8.5a.5.5 0 00.5-.5V4H14a.5.5 0 000-1zM6.91 1.98c.23-.29.58-.48 1.09-.48s.85.19 1.09.48c.2.24.3.6.36 1.02h-2.9c.05-.42.17-.78.36-1.02zm4.84 11.52h-7.5V4h7.5v9.5z" fill="currentColor"></path>
+                                    <path d="M6.55 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5zM9.45 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </li>
+                `;
+            });
+
+            drawerProductList.insertAdjacentHTML('afterbegin', buildProductListItems);
+
+            drawerEmpty.style.display = 'none'
+            drawerProductList.style.display = 'block'
+
+            document.querySelectorAll('.btn-remove-from-wishlist:not(.init)').forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    btn.classList.add('init');
+
+                    wishlist = wishlist.filter((elem) => elem.handle !== btn.dataset.productHandle);
+                    localStorage.setItem(localStorageKey, JSON.stringify(wishlist));
+
+                    initWishlist();
+                    buildWishlistDrawer();
+                });
+            });
+        }
+    };
+    buildWishlistDrawer();
+})
+</script>
+
+<div 
+    id="eg-wishlist-drawer" 
+    class="offcanvas offcanvas-end" 
+    tabindex="-1" 
+    aria-labelledby="eg-wishlist-drawer-label"
+    data-display-btn-pdp="{{ section.settings.display_btn_pdp }}"
+    data-display-btn-lists="{{ section.settings.display_btn_lists }}"
+    data-img-width="{{ product_img_width }}"
+    data-img-height="{{ product_img_height }}"
+    data-img-size="{{ product_img_size }}"
+    data-text-wishlist="{{ section.settings.text_wishlist }}"
+    data-text-add="{{ section.settings.text_add }}"
+    data-text-remove="{{ section.settings.text_remove }}"
+    data-text-empty="{{ section.settings.text_empty }}"
+    data-money-format="{{ shop.money_format }}"
+    style="width: {{ section.settings.drawer_width | append: 'px' }}">
+    <div class="offcanvas-header border-bottom">
+        <h3 id="eg-wishlist-drawer-label" class="offcanvas-title m-0">
+            {{ section.settings.header_title }}
+        </h3>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div id="eg-wishlist-drawer-empty" class="h-100" style="display: none;">
+            <p class="d-flex justify-content-center flex-column align-items-center h-100 m-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="icon icon-wishlist bi bi-heart" viewBox="0 0 16 16">
+                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                </svg>
+                {{ section.settings.text_empty }} 
+            </p>
+        </div>
+        <ul id="eg-wishlist-drawer-product-list" class="product-list list-unstyled mb-0" style="display: none;">
+            {% comment %} Injectected via JavaScript {% endcomment %}
+        </ul>
+    </div>
+    <div class="offcanvas-footer py-4 px-4">
+        <button
+            type="button"
+            id="button-continue-shopping"
+            class="button button--secondary w-100 d-flex align-items-center justify-content-center"
+            data-bs-dismiss="offcanvas">
+            {{ 'general.continue_shopping' | t }}
+        </a>
+    </div>
+</div>
+
+{% schema %}
+{
+    "name": "EG Wishlist Drawer",
+    "settings": [
+        {
+            "type": "header",
+            "content": "General"
+        },
+        {
+            "type": "text",
+            "id": "drawer_width",
+            "label": "Drawer Width (px)",
+            "default": "400",
+            "info": "Note: On mobile the drawer width will always be 100%"
+        },
+        {
+            "type": "text",
+            "id": "header_title",
+            "label": "Header title",
+            "default": "Wishlist"
+        },
+        {
+            "type": "checkbox",
+            "id": "display_btn_pdp",
+            "label": "Product page - Display wishlist button",
+            "info": "Will display below the 'Add to cart' form",
+            "default": true
+        },
+        {
+            "type": "checkbox",
+            "id": "display_btn_lists",
+            "label": "Product lists - Display wishlist button",
+            "info": "Will display for each product card a small heart within the image",
+            "default": true
+        },
+        {
+            "type": "header",
+            "content": "Products"
+        },
+        {
+            "type": "select",
+            "id": "product_img_orientation",
+            "label": "Product image orientation",
+            "default": "square",
+            "options": [
+                { "value": "square", "label": "Square" },
+                { "value": "landscape", "label": "Landscape" },
+                { "value": "potrait", "label": "Potrait" }
+            ]
+        },
+        {
+            "type": "header",
+            "content": "Translatable Text"
+        },
+        {
+            "type": "text",
+            "id": "text_wishlist",
+            "label": "Wishlist",
+            "default": "Wishlist"
+        },
+        {
+            "type": "text",
+            "id": "text_add",
+            "label": "Add",
+            "default": "Add to wishlist"
+        },
+        {
+            "type": "text",
+            "id": "text_remove",
+            "label": "Remove",
+            "default": "Remove from wishlist"
+        },
+        {
+            "type": "text",
+            "id": "text_empty",
+            "label": "Empty",
+            "default": "Your wishlist is currently empty."
+        }
+    ]
+}
+{% endschema %}
